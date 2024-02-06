@@ -4,11 +4,47 @@
 package eth.springreactor;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import reactor.core.publisher.Flux;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class AppTest {
-    @Test void appHasAGreeting() {
-        App classUnderTest = new App();
-        assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
+    @Test
+    void testSubscribe() {
+        List<Integer> elements = new ArrayList<>();
+        Flux<Integer> just = Flux.just(1, 2, 3, 4);
+        just.log().subscribe(elements::add);
+        System.out.println(elements);
     }
+
+    @Test
+    void testAnother() {
+       final List<Integer> elements = new ArrayList<>();
+        Flux.just(1, 2, 3, 4)
+                .log()
+                .subscribe(new Subscriber<>() {
+                    @Override
+                    public void onSubscribe(Subscription s) {
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        elements.add(integer);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+
 }
