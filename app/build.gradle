@@ -15,6 +15,9 @@ dependencies {
 
     implementation 'com.google.guava:guava:31.1-jre'
 
+    implementation platform('io.projectreactor:reactor-bom:2023.0.2')
+    implementation 'io.projectreactor:reactor-core'
+
 }
 
 dependencyManagement {

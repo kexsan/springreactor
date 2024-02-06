@@ -3,12 +3,17 @@
  */
 package eth.springreactor;
 
+import reactor.core.publisher.Flux;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        List<Integer> elements = new ArrayList<>();
+        Flux<Integer> just = Flux.just(1, 2, 3, 4);
+        just.log().subscribe(elements::add);
+        System.out.println(elements);
     }
 }
