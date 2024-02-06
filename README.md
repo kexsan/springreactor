@@ -1,1 +1,3 @@
 # springreactor
+
+# USE gradlew test
