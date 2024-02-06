@@ -4,10 +4,15 @@
 package eth.springreactor;
 
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.Disposable;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +27,7 @@ class AppTest {
 
     @Test
     void testAnother() {
-       final List<Integer> elements = new ArrayList<>();
+        final List<Integer> elements = new ArrayList<>();
         Flux.just(1, 2, 3, 4)
                 .log()
                 .subscribe(new Subscriber<>() {
@@ -44,6 +49,83 @@ class AppTest {
                     public void onComplete() {
                     }
                 });
+    }
+
+    @Test
+    void testFluxRange() {
+        List<Integer> elements = new ArrayList<>();
+        Flux<Integer> flux = Flux.range(1, 200);
+        flux.log().subscribe(elements::add);
+        System.out.println(elements);
+    }
+
+    @Test
+    void testFluxGenerate() throws InterruptedException {
+
+        Flux.generate(sinc -> {
+                            sinc.next("123");
+                        }
+                ).delayElements(Duration.ofMillis(500))
+                .take(4)
+                .subscribe(System.out::println);
+
+        Thread.sleep(4000l);
+    }
+
+
+    @Test
+    void testFluxGenerateState() throws InterruptedException {
+
+        Flux.generate(
+                () -> 1234,
+                (state, sink) -> {
+                    if (state > 2237) {
+                        sink.complete();
+                    } else {
+                        sink.next(state);
+                    }
+                    return state + 3;
+                }
+        ).subscribe(System.out::println);
+
+
+    }
+
+
+    @Test
+    void testFluxCreate() throws InterruptedException {
+
+
+        Flux<Integer> producer = Flux.generate(
+                () -> 2,
+                (state, sink) -> {
+                    if (state > 15) {
+                        sink.complete();
+                    } else {
+                        sink.next(state);
+                    }
+                    return state + 3;
+                }
+        );
+
+
+        Flux.create(
+                sink -> producer.subscribe(new BaseSubscriber<Integer>() {
+
+
+                    @Override
+                    protected void hookOnNext(Integer value) {
+                        sink.next(value);
+                    }
+
+                    @Override
+                    protected void hookOnComplete() {
+                        sink.complete();
+                    }
+                })
+        ).subscribe(System.out::println);
+
+
     }
 
 
